@@ -2,38 +2,35 @@ package letme.mukhtarif.selfident_report.Adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import letme.mukhtarif.selfident_report.Model.dataSekolahModel;
+import letme.mukhtarif.selfident_report.Model.DataSekolahModel;
 import letme.mukhtarif.selfident_report.R;
 
 /**
  * Created by Mukhtarif-PC on 01/03/2018.
  */
 
-public class DataSekolahAdapter extends ArrayAdapter<dataSekolahModel> {
+public class DataSekolahAdapter extends ArrayAdapter<DataSekolahModel> {
     Context mContext;
-    List<dataSekolahModel> dataSekolah;
+    List<DataSekolahModel> dataSekolah;
     LayoutInflater inflater;
 
-    public DataSekolahAdapter(Activity mContext, int resourceId, int textViewId, List<dataSekolahModel> dataSekolah) {
+    public DataSekolahAdapter(Activity mContext, int resourceId, int textViewId, List<DataSekolahModel> dataSekolah) {
         super(mContext, resourceId, textViewId, dataSekolah);
         inflater = mContext.getLayoutInflater();
     }
 
     private View rowview(View convertView , int position){
 
-        dataSekolahModel dataSekolah = getItem(position);
+        DataSekolahModel dataSekolah = (DataSekolahModel) getItem(position);
+        String namaSekolah = dataSekolah.getNamasekolah();
 
         viewHolder holder;
         View rowview = convertView;
@@ -49,7 +46,7 @@ public class DataSekolahAdapter extends ArrayAdapter<dataSekolahModel> {
         }else{
             holder = (viewHolder) rowview.getTag();
         }
-        holder.txtHasilNamaSekolah.setText(dataSekolah.getNamasekolah());
+        holder.txtHasilNamaSekolah.setText(namaSekolah);
 
         return rowview;
     }

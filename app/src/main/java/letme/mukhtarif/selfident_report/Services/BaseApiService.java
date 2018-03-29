@@ -1,6 +1,7 @@
 package letme.mukhtarif.selfident_report.Services;
 
-import letme.mukhtarif.selfident_report.Model.dataSekolahModel;
+import letme.mukhtarif.selfident_report.Model.DataKelasModel;
+import letme.mukhtarif.selfident_report.Model.DataSekolahModel;
 import letme.mukhtarif.selfident_report.Model.dataSiswaModel;
 import retrofit2.Call;
 import retrofit2.http.Field;
@@ -16,8 +17,12 @@ public interface BaseApiService {
     @FormUrlEncoded
     @POST("lihathasil.php")
     Call<ResponseService<dataSiswaModel>> lihatHasil(@Field("namasekolah") String namasekolah,
-                                    @Field("namakelas") String namakelas);
+                                                     @Field("namakelas") String namakelas);
 
     @GET("lihathasil.php")
-    Call<ResponseService<dataSekolahModel>> lihatSekolah();
+    Call<ResponseService<DataSekolahModel>> lihatDataSekolah();
+
+    @FormUrlEncoded
+    @POST("lihathasil.php")
+    Call<ResponseService<DataKelasModel>> lihatDataKelas(@Field("namakelas") String namasekolah);
 }

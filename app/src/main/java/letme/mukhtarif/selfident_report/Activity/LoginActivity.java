@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -19,8 +18,10 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import letme.mukhtarif.selfident_report.Adapter.DataKelasAdapter;
 import letme.mukhtarif.selfident_report.Adapter.DataSekolahAdapter;
-import letme.mukhtarif.selfident_report.Model.dataSekolahModel;
+import letme.mukhtarif.selfident_report.Model.DataKelasModel;
+import letme.mukhtarif.selfident_report.Model.DataSekolahModel;
 import letme.mukhtarif.selfident_report.Model.dataSiswaModel;
 import letme.mukhtarif.selfident_report.R;
 import letme.mukhtarif.selfident_report.Services.BaseApiService;
@@ -33,11 +34,13 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
     List<dataSiswaModel> dataSiswa;
-    List<dataSekolahModel> dataSekolah;
+    List<DataSekolahModel> dataSekolah;
+    List<DataKelasModel> dataKelas;
 
-    EditText edNamaKelas, edNamaSekolah;
+    String namaSekolah = "", namaKelas;
+
     Button btnMasuk;
-    Spinner spinnerNamaSekolah;
+    Spinner spinnerNamaSekolah, spinnerNamaKelas;
 
     Context mContext;
     BaseApiService mApiService;
@@ -47,10 +50,9 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        edNamaSekolah = findViewById(R.id.edNamaSekolah);
-        edNamaKelas = findViewById(R.id.edNamaKelas);
         btnMasuk = findViewById(R.id.btnMasuk);
         spinnerNamaSekolah = findViewById(R.id.SpinnerNamaSekolah);
+        spinnerNamaKelas = findViewById(R.id.SpinnerNamaKelas);
 
 
 
@@ -58,32 +60,38 @@ public class LoginActivity extends AppCompatActivity {
         mApiService = UtilsApi.getAPIService();
 
         addSpinnerSekolahItem();
-
-        btnMasuk.setOnClickListener(new View.OnClickListener() {
+        /*btnMasuk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 lihatHasil();
             }
-        });
+        });*/
     }
 
+
+
     private void addSpinnerSekolahItem() {
-        Call<ResponseService<dataSekolahModel>> dataSekolahCall = mApiService.lihatSekolah();
-        dataSekolahCall.enqueue(new Callback<ResponseService<dataSekolahModel>>() {
+        Call<ResponseService<DataSekolahModel>> dataSekolahCall = mApiService.lihatDataSekolah();
+        dataSekolahCall.enqueue(new Callback<ResponseService<DataSekolahModel>>() {
             @Override
-            public void onResponse(Call<ResponseService<dataSekolahModel>> call, Response<ResponseService<dataSekolahModel>> response) {
+            public void onResponse(Call<ResponseService<DataSekolahModel>> call, Response<ResponseService<DataSekolahModel>> response) {
                 dataSekolah = response.body().getDataList();
-                Log.d("Retrofit Get ", "Total Data = " + String.valueOf(dataSekolah.size()));
+                Log.d("Retrofit Get ", "Total Data = " + dataSekolah.size());
                 Toast.makeText(mContext, "Berhasil", Toast.LENGTH_LONG).show();
+                for (DataSekolahModel data : dataSekolah) {
+                    Log.i("DataLogin", "Data : "+data.getNamasekolah());
+                }
                 DataSekolahAdapter dataSekolahAdapter = new DataSekolahAdapter(LoginActivity.this, R.layout.data_sekolah_item, R.id.txtHasilNamaSekolah, dataSekolah);
                 spinnerNamaSekolah.setAdapter(dataSekolahAdapter);
 
                 spinnerNamaSekolah.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        dataSekolahModel dataSekolah;
-                        dataSekolah = (dataSekolahModel) adapterView.getSelectedItem();
-                        Toast.makeText(mContext, dataSekolah.getNamasekolah(), Toast.LENGTH_LONG).show();
+                        DataSekolahModel dataSekolah = (DataSekolahModel) adapterView.getSelectedItem();
+                        namaSekolah = dataSekolah.getNamasekolah();
+                        Toast.makeText(mContext, namaSekolah, Toast.LENGTH_LONG).show();
+
+                        addSpinnerKelasItem();
                     }
 
                     @Override
@@ -94,14 +102,50 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ResponseService<dataSekolahModel>> call, Throwable t) {
+            public void onFailure(Call<ResponseService<DataSekolahModel>> call, Throwable t) {
                 Log.e("Retrofit Get ", t.toString());
                 Toast.makeText(mContext, t.toString(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    private void lihatHasil() {
+    private void addSpinnerKelasItem() {
+        Log.e("Data Sekolah", "Get Data : "+namaSekolah);
+        Call<ResponseService<DataKelasModel>> dataKelasCall = mApiService.lihatDataKelas(namaSekolah);
+        dataKelasCall.enqueue(new Callback<ResponseService<DataKelasModel>>() {
+            @Override
+            public void onResponse(Call<ResponseService<DataKelasModel>> call, Response<ResponseService<DataKelasModel>> response) {
+                dataKelas = response.body().getDataList();
+                Log.d("Retrofit Get Data Kelas", "Total Data = " + dataKelas.size());
+                for (DataKelasModel data : dataKelas) {
+                    Log.i("Data Kelas", "Total Data = " + data.getNamakelas());
+                }
+
+                DataKelasAdapter dataKelasAdapter = new DataKelasAdapter(LoginActivity.this, R.layout.data_kelas_item, R.id.txtHasilNamaKelas, dataKelas);
+                spinnerNamaKelas.setAdapter(dataKelasAdapter);
+
+                spinnerNamaKelas.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        namaKelas = (String) adapterView.getSelectedItem();
+                        Toast.makeText(mContext, namaKelas, Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<ResponseService<DataKelasModel>> call, Throwable t) {
+                Log.e("Data Kelas get Error", "Error is " + t.toString());
+            }
+        });
+    }
+
+    /*private void lihatHasil() {
             Call<ResponseService<dataSiswaModel>> dataSiswaCall = mApiService.lihatHasil(edNamaSekolah.getText().toString(), edNamaKelas.getText().toString());
             dataSiswaCall.enqueue(new Callback<ResponseService<dataSiswaModel>>() {
                 @Override
@@ -123,7 +167,7 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(mContext,"Error : "+toString(),Toast.LENGTH_LONG).show();
                 }
             });
-        }
+    }*/
         /*mApiService.lihatHasil(edNamaKelas.getText().toString(),
                 edNamaSekolah.getText().toString())
                 .enqueue(new Callback<ResponseBody>() {
